@@ -1,0 +1,633 @@
+{
+  "name": "Automated Google Form to PDF Report System",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Sidereal Astrology Survey (Responses)",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 519811292,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        -960
+      ],
+      "id": "a9c3b957-a9e1-4893-9426-13814e28260d",
+      "name": "New Form Entry Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Act as an expert astrologer in sidereal astrology, specializing in Vedic astrology and esoteric mystical astrology. Use a deep and spiritual tone.\n\nPrepare an astrological report based on the user's following information:\n\nBirth date: {{ $json['What is your birth date?'] }}\nLocation: {{ $json['What is your birth location (City, State, Country)?'] }}\nFamiliar with Sideral Astrology: {{ $json['How familiar are you with Sidereal Astrology?'] }}\nSideral or Tropical: {{ $json['Do you prefer Sidereal or Tropical astrology?'] }}\nOpinion about Sideral Astrology: {{ $json['How accurate do you find Sidereal astrology readings to be for your personal experiences?'] }}\nZodiac Sign that resonates: {{ $json['Which of the following Sidereal zodiac signs resonate with you the most?'] }}\nInterest: {{ $json['Rate the importance of the following elements in Sidereal astrology for your understanding: [Nakshatras (Lunar Mansions)]'] }}\nRecommendations:{{ $json['What aspects of Sidereal Astrology are you most interested in learning more about?'] }}\n\nInclude personalized astrological analysis, spiritual guidance, and symbol interpretation if there are keywords.\n\nEnd the report with an inspirational quote connected to their cosmic path."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -520,
+        -960
+      ],
+      "id": "da712eec-78cb-4403-bdad-0a88b17343df",
+      "name": "Generate Report Prompt",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1f086f4-cdc3-4e7d-8cca-c7e23fcad248",
+              "name": "Astrological Report",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -160,
+        -960
+      ],
+      "id": "70ba2cc2-2868-4aa4-a32e-8f0e5036ad0b",
+      "name": "Clean Prompt Format"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Take the following astrological report and refine it with poetic, mystical, and sacred language. You are a spiritual scribe channeling the wisdom of the cosmos.\n\nThe report should sound as if it were spoken by an ancient astrologer-guide, blending astrological knowledge with soul-aligned truth.\n\nInput:{{ $json['Astrological Report'] }}\n\nTasks:\n- Maintain the main meaning and structure\n- Elevate the tone with poetic expressions, archetypal language, and sacred metaphors\n- Insert spiritual keywords and symbols where relevant (e.g., Sirius, karma, soul path, Saturn, light codes, constellations)\n- Avoid repetitive phrases\n- Flow naturally, like a cosmic chant\n\nClose the message with a mantra or final spiritual activation phrase — something powerful and uplifting that invites the reader to align with their sidereal truth.\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        60,
+        -960
+      ],
+      "id": "3e399b7d-8d96-403b-8f39-1965efcc5472",
+      "name": "Generate Full Report",
+      "credentials": {
+        "openAiApi": {
+          "id": "",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "=## 🌌 {{ $json.message.content.sidereal_soul_reading.title }}\n\n**📅 Birth Date:** {{ $json.message.content.sidereal_soul_reading.native_info.birth_date }}\n**🌍 Location:**  {{ $json.message.content.sidereal_soul_reading.native_info.location }}\n**🧭 System:** {{ $json.message.content.sidereal_soul_reading.native_info.system }}\n\n---\n\n### 🔥 Introduction\n\n{{ $json.message.content.sidereal_soul_reading.introduction }}\n\n---\n\n### 🪐 Birth Chart Overview\n\n- ☀️ Sun: {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Sun }}\n\n{{ $json.message.content.sidereal_soul_reading.sun_in_aries }}\n\n- 🌙 Moon: {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Moon }}\n\n{{ $json.message.content.sidereal_soul_reading.moon_in_scorpio }}\n\n- ⬆️ Ascendant: {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Ascendant }}\n\n- 🪐 Saturn:  {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Saturn }}\n\n{{ $json.message.content.sidereal_soul_reading.saturn_in_scorpio }}\n\n- 🌀 Rahu: {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Rahu }}\n\n- 🔻 Ketu: {{ $json.message.content.sidereal_soul_reading.birth_chart_overview.Ketu }}\n\n{{ $json.message.content.sidereal_soul_reading.rahu_ketu_axis }}\n\n{{ $json.message.content.sidereal_soul_reading.planetary_yoga_insights }}\n\n{{ $json.message.content.sidereal_soul_reading.spiritual_guidance_sadhana }}\n---\n\n🕯️ *May this report serve as a torch on your path of remembrance.*\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        420,
+        -960
+      ],
+      "id": "8e0cc2fd-fbad-4a0d-be77-b1bf8ff3a1b6",
+      "name": "Convert to HTML"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"html\": {{ JSON.stringify($node[\"Convert to HTML\"].json[\"data\"]) }}\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        -960
+      ],
+      "id": "c1b8ada6-5a38-444d-9a3b-6ef9f34991e4",
+      "name": "Prepare HTML Payload"
+    },
+    {
+      "parameters": {
+        "operation": "URL/HTML to PDF",
+        "convertType": "htmlToPDF",
+        "html": "={{ $json.html }}\n\n\n",
+        "advancedOptions": {}
+      },
+      "type": "n8n-nodes-pdfco.PDFco Api",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -960
+      ],
+      "id": "cf63b25f-7b2a-458e-af9a-eecae4472855",
+      "name": "Generate PDF",
+      "credentials": {
+        "pdfcoApi": {
+          "id": "",
+          "name": "PDF.co account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1080,
+        -960
+      ],
+      "id": "250b67e1-3e31-40d7-95de-6747dfb89caf",
+      "name": "Download PDF File"
+    },
+    {
+      "parameters": {
+        "name": "Report",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1300,
+        -960
+      ],
+      "id": "0f3687ad-a4d3-46ae-aaa2-fb7138b70005",
+      "name": "Save to Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "Report",
+        "message": "=<h2>✨ Sidereal Soul Codex Report ✨</h2>\n<p>Hello Toro,</p>\n<p>Your personalized report is now ready. You can view or download it using the link below:</p>\n\n<p><a href=\"{{ $json[\"webViewLink\"] }}\" target=\"_blank\">📄 View Report</a></p>\n\n<p>Thank you for using the automated astrological reading system!<br>\nWith every star, we align deeper with purpose. 🌌</p>\n\n<p>Cosmic hugs,<br><strong>Saturn Automation</strong></p>\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1520,
+        -960
+      ],
+      "id": "f222f73a-8410-4ddb-9415-09e2bc362054",
+      "name": "Send Email Report",
+      "webhookId": "0220c705-05e5-4a32-a8de-d66a70a3c898",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Sidereal Astrology Survey (Responses)",
+          "cachedResultUrl": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 519811292,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "={{ $json.labelIds[1] }}",
+            "PDF LINK": "={{ $('Generate PDF').item.json.url }}",
+            "Data Sent": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "Status"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "What is your birth date?",
+              "displayName": "What is your birth date?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "What is your birth time? (If unknown, please provide an estimate)",
+              "displayName": "What is your birth time? (If unknown, please provide an estimate)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "What is your birth location (City, State, Country)?",
+              "displayName": "What is your birth location (City, State, Country)?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "How familiar are you with Sidereal Astrology?",
+              "displayName": "How familiar are you with Sidereal Astrology?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Do you prefer Sidereal or Tropical astrology?",
+              "displayName": "Do you prefer Sidereal or Tropical astrology?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "How accurate do you find Sidereal astrology readings to be for your personal experiences?",
+              "displayName": "How accurate do you find Sidereal astrology readings to be for your personal experiences?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Which of the following Sidereal zodiac signs resonate with you the most?",
+              "displayName": "Which of the following Sidereal zodiac signs resonate with you the most?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Planetary Positions]",
+              "displayName": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Planetary Positions]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Nakshatras (Lunar Mansions)]",
+              "displayName": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Nakshatras (Lunar Mansions)]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Dasha System (Planetary Periods)]",
+              "displayName": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Dasha System (Planetary Periods)]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Yoga (Planetary Combinations)]",
+              "displayName": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Yoga (Planetary Combinations)]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Ayanamsa (Precession of Equinoxes)]",
+              "displayName": "Rate the importance of the following elements in Sidereal astrology for your understanding: [Ayanamsa (Precession of Equinoxes)]",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "What aspects of Sidereal Astrology are you most interested in learning more about?",
+              "displayName": "What aspects of Sidereal Astrology are you most interested in learning more about?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Do you have any recommendations for resources (books, websites, astrologers) on Sidereal Astrology?",
+              "displayName": "Do you have any recommendations for resources (books, websites, astrologers) on Sidereal Astrology?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PDF LINK",
+              "displayName": "PDF LINK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data Sent",
+              "displayName": "Data Sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1740,
+        -960
+      ],
+      "id": "aaea4f98-b4e5-448f-9d93-ff7c45f0165b",
+      "name": "Update Sheet Log",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "U08RY8R1U9Z",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "text": "=📤 New AI Report Sent\n\n📌 Client: {{$json[\"client_name\"] || \"Unknown\"}}\n🗂 Type: {{$json[\"report_type\"] || \"General\"}}\n📎 PDF: {{ $json['PDF LINK'] }}\n📧 Sent to: alvaroleopoldovazquez@gmail.com ✅\n📅 Date: {{ $now }}\n",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1960,
+        -960
+      ],
+      "id": "d79e119e-7f37-47e6-9de0-fa593d9632da",
+      "name": "Send Slack Internal Notification",
+      "webhookId": "b58669b0-3ef8-42c0-8467-47032244bc74",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "New Form Entry Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Report Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Report Prompt": {
+      "main": [
+        [
+          {
+            "node": "Clean Prompt Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Prompt Format": {
+      "main": [
+        [
+          {
+            "node": "Generate Full Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Full Report": {
+      "main": [
+        [
+          {
+            "node": "Convert to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to HTML": {
+      "main": [
+        [
+          {
+            "node": "Prepare HTML Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare HTML Payload": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF": {
+      "main": [
+        [
+          {
+            "node": "Download PDF File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF File": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Google Drive": {
+      "main": [
+        [
+          {
+            "node": "Send Email Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Report": {
+      "main": [
+        [
+          {
+            "node": "Update Sheet Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Sheet Log": {
+      "main": [
+        [
+          {
+            "node": "Send Slack Internal Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "be0c83eb-a862-4484-a142-2f774005506f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "13e20c97097a8d1de6d76dbd27c72163b6f6ec6e4a342023f3f77157e413842e"
+  },
+  "id": "avtyencUVGqYnwLh",
+  "tags": []
+}
